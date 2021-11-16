@@ -14,7 +14,8 @@ public with sharing class MaintenanceRequestHelper {
                                                      for(Case cc : existingMainReq){      
                                   if((cc.Type == 'Repair' || cc.Type == 'Routine Maintenance') && cc.Status == 'Closed'){   
                                       caseIdsList.add(cc);                 
-                                  }       
+                                  }      
+                                    
                                                      }          
                                                }         
             List<Equipment_Maintenance_Item__c> equipMainList = 
