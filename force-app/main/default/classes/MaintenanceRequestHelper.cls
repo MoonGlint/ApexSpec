@@ -11,7 +11,7 @@ public with sharing class MaintenanceRequestHelper {
                                     Map<Equipment_Maintenance_Item__c,Id> EquipMainItemsToProdIds = 
                                     new Map<Equipment_Maintenance_Item__c,Id>();       
                                                if(!existingMainReq.isEmpty()){       
-                                                     for(Case cc : existingMainReq){      
+                                                      for(Case cc : existingMainReq){      
                                   if((cc.Type == 'Repair' || cc.Type == 'Routine Maintenance') && cc.Status == 'Closed'){   
                                       caseIdsList.add(cc);                 
                                   }      
