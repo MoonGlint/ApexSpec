@@ -1,24 +1,23 @@
+@TestVisible
 public with sharing class WarehouseCalloutService implements Queueable,Database.AllowsCallouts{
     private static final String WAREHOUSE_URL = 'https://th-superbadge-apex.herokuapp.com/equipment';
-    public WarehouseCalloutService() {
-    }
-    
-    
+
     public void execute(QueueableContext context) { 
        WarehouseCalloutService.restWareHouseCall(); 
     }
-    
-    private static void restWareHouseCall(){
-        List<JsonResponse> jsonList;
    
+    public static void restWareHouseCall(){
+         List<JsonResponse> jsonList;
+   		
         Http http = new Http();
         HttpRequest request = new HttpRequest();
         request.setEndpoint(WAREHOUSE_URL);
         request.setMethod('GET');
         request.setHeader('Content-Type','application/json');
         HttpResponse response = http.send(request);
+     //   System.debug('Response:'+ response);
         if (response.getStatusCode()==200){
-         System.debug('Getting body of response...  '+   response.getBody());
+      //   System.debug('Getting body of response...  '+   response.getBody());
      
      //       deserialize(jsonString, apexType)
      //       Deserializes the specified JSON string into an Apex object of the specified type.
@@ -28,6 +27,7 @@ public with sharing class WarehouseCalloutService implements Queueable,Database.
                     WarehouseCalloutService.newProductsCreation(jsonList);
         
         }
+    
     }
     
     private static void newProductsCreation(List<JsonResponse> jsonList){
@@ -41,7 +41,7 @@ public with sharing class WarehouseCalloutService implements Queueable,Database.
            
             newProduct = new Product2( 
                 						ExternalId = jsResponse.id,	
-                						Replacement_Part__c = true,
+                						Replacement_Part__c = true,//jsResponse.replacement,
                                         Cost__c = jsResponse.cost,
                                         Name = jsResponse.name,
                                         Lifespan_Months__c = jsResponse.lifespan,
@@ -53,7 +53,10 @@ public with sharing class WarehouseCalloutService implements Queueable,Database.
 
 
         }
+        if (newProductList.size()!=0){
+            System.debug(newProductList);
         upsert(newProductList);
+        }
         
 
 
