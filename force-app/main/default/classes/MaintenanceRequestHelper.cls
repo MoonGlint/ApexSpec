@@ -3,30 +3,39 @@ public with sharing class MaintenanceRequestHelper {
                
             List<Case> existingMainReq =Trigger.New;   
             Integer count = 0;
-           
+           			
+                // List of Maintenance_Request__c obj with condition jf Type and Status
+				List<Case> caseIdsList = new List<Case>();   	            
+            
+            
                   Map<Id, Integer> toGetDueDateMap = new Map<Id, Integer>();
-                       Map<Id,Case> newCasesToIdsMap = new Map<Id,Case>();      
-                          List<Case> createNewMainReq = new List<Case>();     
-                              List<Case> caseIdsList = new List<Case>();   
-                                    Map<Equipment_Maintenance_Item__c,Id> EquipMainItemsToProdIds = 
-                                    new Map<Equipment_Maintenance_Item__c,Id>();       
-                                               if(!existingMainReq.isEmpty()){       
-                                                     for(Case cc : existingMainReq){      
-                                  if((cc.Type == 'Repair' || cc.Type == 'Routine Maintenance') && cc.Status == 'Closed'){   
-                                      caseIdsList.add(cc);                 
-                                  }       
-                                                     }          
-                                               }         
+                  Map<Id,Case> newCasesToIdsMap = new Map<Id,Case>();      
+                  List<Case> createNewMainReq = new List<Case>();     
+                  //Map of Equipment_Maintenance_Item__c and Equipment__c(Product2) Ids
+                  Map<Equipment_Maintenance_Item__c,Id> EquipMainItemsToProdIds = new Map<Equipment_Maintenance_Item__c,Id>();       
+            
+            if(!existingMainReq.isEmpty()){       
+            
+                for(Case cc : existingMainReq){      
+            
+                if((cc.Type == 'Repair' || cc.Type == 'Routine Maintenance') && cc.Status == 'Closed'){   
+                caseIdsList.add(cc);                 
+            }       
+            }          
+            }         
+           // List of Equipment_Maintenance_Item__c for Maintenance__Requst__c(caseIdsList)
             List<Equipment_Maintenance_Item__c> equipMainList = 
                 [Select id,Equipment__c,Maintenance_Request__c 
                  from Equipment_Maintenance_Item__c 
                  where Maintenance_Request__c IN : caseIdsList];  
+            
+            
             if(!equipMainList.isEmpty()){          
                 for(Equipment_Maintenance_Item__c equipMainn : equipMainList){  
                     EquipMainItemsToProdIds.put(equipMainn,equipMainn.Equipment__c); 
                     system.debug(EquipMainItemsToProdIds.size()); 
                     if(EquipMainItemsToProdIds.size() > 1){ 
-                        count = EquipMainItemsToProdIds.size(); 
+                        count = EquipMainItemsToProdIds.size(); ///////////////////////
                     }           
                 }         
             }      
@@ -45,11 +54,12 @@ public with sharing class MaintenanceRequestHelper {
                     mainRe.Type = 'Routine Maintenance';  
                     mainRe.Subject = 'New Main Request For Vehicle for Apex Specialist';
                     mainRe.Date_Reported__c = date.today(); 
-                    if(count > 1){ 
-                        mainRe.Date_Due__c = Date.today().addDays(toGetDueDateMap.get(equip.Id));
-                    }                     else{  
-                        mainRe.Date_Due__c = Date.today();
-                    }                     
+                    //if(count > 1){ 
+                        mainRe.Date_Due__c = Date.today().addDays(toGetDueDateMap.get(equip.Id));////////////////////////////
+                    //}  
+                    //else{  
+                    //    mainRe.Date_Due__c = Date.today();
+                    //}                     
                     createNewMainReq.add(mainRe); 
                     newCasesToIdsMap.put(c.Id,mainRe); 
                 }                  
@@ -61,7 +71,7 @@ public with sharing class MaintenanceRequestHelper {
         }     
         public static void cloneEquipItems(List<case> closedCaseRecords, Map<Id,case> newCreatedCasesMapp){  
             List<Equipment_Maintenance_Item__c> newEquipItems = new List<Equipment_Maintenance_Item__c>();
-            try{            
+          //  try{            
                 if(!closedCaseRecords.isEmpty() && newCreatedCasesMapp.size()>0){ 
                     List<Equipment_Maintenance_Item__c> oldEquipItems =
                         [SELECT Equipment__c, Maintenance_Request__c, Quantity__c,Maintenance_Request__r.Id  
@@ -69,14 +79,14 @@ public with sharing class MaintenanceRequestHelper {
                          WHERE  Maintenance_Request__c IN :closedCaseRecords];  
                     for(Equipment_Maintenance_Item__c equipItem : oldEquipItems) { 
                         Equipment_Maintenance_Item__c newItem = equipItem.clone(false, true, false, false);
-                        newItem.Maintenance_Request__c = newCreatedCasesMapp.get(equipItem.Maintenance_Request__c).id;
+                       // newItem.Maintenance_Request__c = newCreatedCasesMapp.get(equipItem.Maintenance_Request__c).id;//////////
                         newEquipItems.add(newItem); 
                     }
                     insert newEquipItems;
                 }         
-            }         
-            catch(Exception e) { 
-                System.debug('Exception is'+ e);
-            }    
+           // }         
+          //  catch(Exception e) { //////////////////////
+          //      System.debug('Exception is'+ e);
+          //  }    
         } 
     }
